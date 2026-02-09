@@ -14,7 +14,7 @@ function App() {
   // OpenWeatherMap API key
   // DEMO KEY (for testing) - Get your own free key at: https://openweathermap.org/api
   // See API_KEY_SETUP.md for detailed instructions
-  const API_KEY = 'bd5e378503939ddaee76f12ad7a97608';
+  const API_KEY = 'c72c646b5a4152f6c668b6925508daac';
   const API_URL = 'https://api.openweathermap.org/data/2.5/weather';
 
   const fetchWeather = async () => {
@@ -34,6 +34,8 @@ function App() {
           throw new Error('City not found. Please check the spelling and try again.');
         } else if (response.status === 401) {
           throw new Error('Invalid API key. Please check your OpenWeatherMap API key.');
+        } else if (response.status === 429) {
+          throw new Error('⚠️ Rate limit exceeded! The demo API key has too many requests. Please get your FREE API key at openweathermap.org/api and replace it in src/App.js (line 17). See API_KEY_SETUP.md for instructions.');
         } else {
           throw new Error('Failed to fetch weather data. Please try again later.');
         }
@@ -43,7 +45,12 @@ function App() {
       setWeather(data);
       setCity(''); // Clear input after successful search
     } catch (err) {
-      setError(err.message || 'An unexpected error occurred. Please try again.');
+      // Handle network errors and API errors
+      if (err.message.includes('fetch')) {
+        setError('Network error. Please check your internet connection.');
+      } else {
+        setError(err.message || 'An unexpected error occurred. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
